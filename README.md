@@ -227,6 +227,169 @@ Returns `201 Created` with the new `product`, `attributes`, and mapped `categori
 
 If any write fails, the transaction is rolled back, so no partial product, attribute, or mapping data is retained.
 
+### Create Product Variant
+
+Creates a variant for an existing active product.
+
+| Item | Value |
+| --- | --- |
+| HTTP method | `POST` |
+| URL | `/api/products/:productId/variants` |
+
+#### Request body
+
+```json
+{
+  "sku": "TSHIRT-M-BLACK",
+  "price": 1299,
+  "stock": 20,
+  "image": "black-shirt.jpg",
+  "status": "active"
+}
+```
+
+#### Success response
+
+Returns `201 Created` with the new product variant.
+
+```json
+{
+  "success": true,
+  "productVariant": {
+    "_id": "product-variant-id",
+    "productId": "PRODUCT_ID",
+    "sku": "TSHIRT-M-BLACK",
+    "price": 1299,
+    "stock": 20,
+    "image": "black-shirt.jpg",
+    "status": "active",
+    "createdAt": "2026-09-15T00:00:00.000Z",
+    "updatedAt": "2026-09-15T00:00:00.000Z"
+  }
+}
+```
+
+#### Validation and errors
+
+- `productId` must be a valid MongoDB ObjectId for an existing active product. An invalid ID returns `400`; a missing or inactive product returns `404`.
+- `sku` is required and must be unique across product variants. A duplicate SKU returns `409`.
+- `price` is required and must be a finite number greater than or equal to `0`.
+- `stock` defaults to `0` and must be a finite number greater than or equal to `0`.
+- `image`, when provided, must be a string.
+- `status` defaults to `active` and must be either `active` or `inactive`.
+
+### List Product Variants
+
+Returns all active variants for an existing product.
+
+| Item | Value |
+| --- | --- |
+| HTTP method | `GET` |
+| URL | `/api/products/:productId/variants` |
+
+#### Success response
+
+Returns `200 OK`. Inactive variants are excluded.
+
+```json
+{
+  "success": true,
+  "productVariants": [
+    {
+      "_id": "PRODUCT_VARIANT_ID",
+      "productId": "PRODUCT_ID",
+      "sku": "TSHIRT-M-BLACK",
+      "price": 1299,
+      "stock": 20,
+      "image": "black-shirt.jpg",
+      "status": "active",
+      "createdAt": "2026-09-15T00:00:00.000Z",
+      "updatedAt": "2026-09-15T00:00:00.000Z"
+    }
+  ]
+}
+```
+
+#### Validation and errors
+
+- `400` â€” `productId` is not a valid MongoDB ObjectId.
+- `404` â€” the product does not exist.
+
+### Get Single Product Variant
+
+Returns one variant only when it belongs to the specified product.
+
+| Item | Value |
+| --- | --- |
+| HTTP method | `GET` |
+| URL | `/api/products/:productId/variants/:variantId` |
+
+#### Success response
+
+Returns `200 OK` with the requested product variant.
+
+```json
+{
+  "success": true,
+  "productVariant": {
+    "_id": "PRODUCT_VARIANT_ID",
+    "productId": "PRODUCT_ID",
+    "sku": "TSHIRT-M-BLACK",
+    "price": 1299,
+    "stock": 20,
+    "image": "black-shirt.jpg",
+    "status": "active",
+    "createdAt": "2026-09-15T00:00:00.000Z",
+    "updatedAt": "2026-09-15T00:00:00.000Z"
+  }
+}
+```
+
+#### Validation and errors
+
+- `400` - `productId` or `variantId` is not a valid MongoDB ObjectId.
+- `404` - the product does not exist, or no variant belongs to that product with the requested `variantId`.
+
+### Get Product by ID
+
+Returns a product with its attributes, categories, and active images. Images are ordered with the primary image first, then by `sortOrder` ascending.
+
+| Item | Value |
+| --- | --- |
+| HTTP method | `GET` |
+| URL | `/api/products/:id` |
+
+#### Success response
+
+```json
+{
+  "success": true,
+  "product": {
+    "_id": "PRODUCT_ID",
+    "name": "Nike Air Max",
+    "sku": "NIKE-AM-100",
+    "price": 2499,
+    "stock": 12,
+    "status": "active",
+    "attributes": [
+      { "attributeCode": "color", "attributeValue": "Black" }
+    ],
+    "categories": [
+      { "_id": "CATEGORY_ID", "name": "Sneakers" }
+    ],
+    "images": [
+      {
+        "_id": "PRODUCT_IMAGE_ID",
+        "imageUrl": "https://placehold.co/1200x1200/png?text=Nike+Air+Max+Primary",
+        "altText": "Nike Air Max primary product image",
+        "isPrimary": true,
+        "sortOrder": 0
+      }
+    ]
+  }
+}
+```
+
 ### Update Product
 
 Updates a product and, when supplied, synchronizes its attributes and category mappings. Attributes and category IDs remain in their dedicated collections; they are not stored on the product document.

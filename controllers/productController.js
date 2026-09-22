@@ -3,6 +3,7 @@ const Product = require('../models/Product');
 const ProductAttribute = require('../models/ProductAttribute');
 const ProductCategory = require('../models/ProductCategory');
 const Category = require('../models/Category');
+const ProductImage = require('../models/ProductImage');
 
 const getPagination = (query) => {
   const page = Number(query.page);
@@ -201,10 +202,20 @@ const getProductById = async (req, res, next) => {
     }
 
     const [productWithDetails] = await addProductDetails([product]);
+    const images = await ProductImage.find({
+      productId: product._id,
+      status: 'active',
+    })
+      .select('_id imageUrl altText isPrimary sortOrder')
+      .sort({ isPrimary: -1, sortOrder: 1 })
+      .lean();
 
     return res.status(200).json({
       success: true,
-      product: productWithDetails,
+      product: {
+        ...productWithDetails,
+        images,
+      },
     });
   } catch (error) {
     return next(error);
