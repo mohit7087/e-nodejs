@@ -1,5 +1,5 @@
 # Base image
-FROM node:18-alpine
+FROM node:20-alpine
 
 # Working directory set karein
 WORKDIR /usr/src/app
