@@ -15,7 +15,7 @@ app.use('/api/', productRoutes);
 app.use('/api/', attributeRoutes);
 app.use('/api/', productVariantRoutes);
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 
 const startServer = async () => {
   await connectDB();
